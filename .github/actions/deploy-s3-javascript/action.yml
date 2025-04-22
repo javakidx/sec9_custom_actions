@@ -13,6 +13,9 @@ inputs:
   dist-folder:
     description: 'Folder containing the static website files'
     required: true
+outputs:
+  deployed-url:
+    description: 'URL of the deployed website'
 runs:
   using: 'node16'
   main: 'main.js'
