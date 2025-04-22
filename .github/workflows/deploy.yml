@@ -50,6 +50,9 @@ jobs:
           name: dist-files
           path: dist
   deploy:
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read # This is required for checking out the code
     needs: build
     runs-on: ubuntu-latest
     environment: testing
@@ -63,16 +66,21 @@ jobs:
           path: ./dist
       - name: Output contents
         run: ls
+      - name: Get AWS permissions
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::637423578993:role/GithubActionsDemo1
+          aws-region: ap-northeast-1
       - name: Deploy site
         id: deploy
         uses: ./.github/actions/deploy-s3-docker
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        # env:
+        #   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         with:
           bucket: bio-gha-hosting
           bucket-region: ap-northeast-1
           dist-folder: ./dist
       - name: Output deployed URL
         run: |
-          echo "Deployed URL: ${{ steps.deploy.outputs.deployed-url }}"
+          echo "Deployed URL: ${{ steps.deploy.outputs.website-url }}"
